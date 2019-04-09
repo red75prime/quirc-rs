@@ -9,5 +9,5 @@ fn main() {
     let src = Path::new(&dir).join("c");
     let fs  = &["decode.c", "identify.c", "quirc.c", "version_db.c"];
     let fs  = fs.iter().map(|f| src.join(f));
-    Build::new().include(&src).files(fs).compile("quirc");
+    Build::new().include(&src).files(fs).opt_level_str("3").compile("quirc");
 }
