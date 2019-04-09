@@ -62,6 +62,9 @@ pub enum Error {
 /// QR code decoder
 pub struct QrCoder(*mut quirc);
 
+// I haven't found anything making QrCoder non-Send
+unsafe impl Send for QrCoder {}
+
 impl QrCoder {
     /// Create a new `QrCoder`.
     pub fn new() -> Result<QrCoder, Error> {
