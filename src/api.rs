@@ -77,8 +77,11 @@ impl QrCoder {
     }
 
     /// Return an `Iterator` over any `QrCodes` detected in the image.
-    pub fn codes(&mut self, src: &[u8], width: u32, height: u32) -> Result<Codes, Error> {
+    pub fn codes(&mut self, src: &[u8], width: u32, height: u32, stride: u32) -> Result<Codes, Error> {
         unsafe {
+            if width == 0 || height == 0 || stride < width {
+                return Err(Error::Short);
+            }
             if quirc_resize(self.0, width as c_int, height as c_int) < 0 {
                 return Err(Error::Alloc);
             }
@@ -87,13 +90,22 @@ impl QrCoder {
             let mut height: c_int = 0;
 
             let ptr = quirc_begin(self.0, &mut width, &mut height);
-            let len = (width * height) as usize;
+            let stride = stride as c_int;
+            if height <= 0 || stride <=0 || width <= 0 {
+                return Err(Error::Short);
+            }
+            let width = width as usize;
+            let height = height as usize;
+            let stride = stride as usize;
+            let len = stride * (height - 1) + width;
 
             if src.len() < len {
                 return Err(Error::Short);
             }
 
-            ptr::copy_nonoverlapping(src.as_ptr(), ptr, len);
+            for y in 0 .. height {
+                ptr::copy_nonoverlapping(&src[y*stride], ptr.add(y*width), width);
+            }
 
             quirc_end(self.0);
 
