@@ -77,7 +77,12 @@ impl QrCoder {
     }
 
     /// Return an `Iterator` over any `QrCodes` detected in the image.
-    pub fn codes(&mut self, src: &[u8], width: u32, height: u32, stride: u32) -> Result<Codes, Error> {
+    pub fn codes(&mut self, src: &[u8], width: u32, height: u32) -> Result<Codes, Error> {
+        self.codes_with_stride(src, width, height, width)
+    }
+
+    /// Return an `Iterator` over any `QrCodes` detected in the image.
+    pub fn codes_with_stride(&mut self, src: &[u8], width: u32, height: u32, stride: u32) -> Result<Codes, Error> {
         unsafe {
             if width == 0 || height == 0 || stride < width {
                 return Err(Error::Short);
